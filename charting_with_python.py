@@ -4,32 +4,19 @@ from pandas_datareader import data as pdr
 import quandl
 import matplotlib.pyplot as plt
 import fix_yahoo_finance # must pip install first 
-from blaze.expr.expressions import label
 import pandas as pd
-from yahoo_finance import Share
-from symbol import comparison
+
 
 class Stock_Analysis:
     #
-    def __init__(self, Stock_Ticker,Start_Date):    
+    def __init__(self, Stock_Ticker,Start_Date,Stock_Name):    
         self.ticker = Stock_Ticker
         self.start_date = Start_Date
-        self.share = Share(self.ticker)
-        self.name = self.share.get_name()
-        try:
-            self.stock_data = pdr.get_data_yahoo(self.ticker,self.start_date)
-        except:
-            print("Error with Yahoo - please enter Quandl Tickers")
-            try:
-                self.quandl_ticker = input()
-                self.stock_data = quandl.get(self.quandl_ticker)
-            except:
-                print("Failled")
-    #
+        self.name = Stock_Name
+        self.stock_data = pdr.get_data_yahoo(self.ticker,self.start_date)
     def Print_Data(self):
         print(self.stock_data)
         return self.stock_data
-    #
     def Print_Linechart(self):
         plt.plot(self.stock_data["Adj Close"],label = self.name)
         plt.title("Adj. Aktienkurs des Unternehmens %s"%self.name)
@@ -37,20 +24,17 @@ class Stock_Analysis:
         plt.xlabel("Time")
         plt.ylabel("Price")
         plt.show()
-    #
     def Histogramm_Returns(self):
         stock_returns = ((self.stock_data["Close"]/self.stock_data["Open"])-1)*100
         plt.hist(stock_returns)
-        plt.title("Verteilung der Tagesrenditen von %s"%self.name)
         plt.show()
-    #
-    def Scatter_Plot(self,comparison_ticker):
+    def Scatter_Plot(self,comparison_ticker,ref_name):
         ref_stock = pdr.get_data_yahoo(comparison_ticker,self.start_date)
-        ref_share = Share(comparison_ticker)
-        ref_stock_name = ref_share.get_name()
+        ref_stock_name = ref_name
         stock_returns = pd.DataFrame(((self.stock_data["Close"]/self.stock_data["Open"])-1)*100)
         ref_returns = pd.DataFrame(((ref_stock["Close"]/ref_stock["Open"])-1)*100)
-        returns_df = stock_returns.join(ref_returns,lsuffix=("Returns %s"%self.name),rsuffix=("Returns %s"%ref_stock_name))
+        returns_df = stock_returns.join(ref_returns,lsuffix=
+        ("Returns %s"%self.name),rsuffix=("Returns %s"%ref_stock_name))
         print(returns_df)
         ax1 = plt.subplot2grid((1,1),(0,0))
         ax1.grid(True, color = "b", linestyle = "-")
@@ -59,12 +43,14 @@ class Stock_Analysis:
         plt.scatter(returns_df[returns_df.columns[1]],returns_df[returns_df.columns[0]])
         plt.title("Scatterplot von %s und %s"%(ref_stock_name,self.name))
         plt.plot()
-        
 
-apple = Stock_Analysis("AAPL","2015-01-01")
-apple.Print_Data()
+Apple = Stock_Analysis("AAPL","2015-01-01","Apple Inc")
+Akktienkurse = Apple.Print_Data()
+Apple.Print_Linechart()
+Apple.Histogramm_Returns()
+Apple.Scatter_Plot("MSFT", "Microsoft")
 
-
+#Small addon - on how to create stack charts
 #Pasiva as Stack Chart
 years = [2012,2013,2014,2015,2016]
 apple_short_credit = [38542,43658,63448,80610,79006]
