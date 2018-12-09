@@ -6,7 +6,6 @@ import fix_yahoo_finance # must pip install first
 import numpy as np
 import pandas as pd
 import datetime
-from conda.common import signals
 from matplotlib import pyplot as plt
 #from skimage.feature.tests.test_util import plt
 
